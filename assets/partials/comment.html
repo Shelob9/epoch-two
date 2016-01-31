@@ -1,0 +1,79 @@
+<div id="comment-{{comment.id}}" data-comment-id="{{comment.id}}">
+    <article id="div-comment-{{comment.id}}" class="epoch-comment-body">
+        <footer class="epoch-comment-meta">
+            <div class="epoch-comment-author">
+                <div class="epoch-comment-author-avatar">
+							<span ng-show="hasAuthorURL({{comment.id}})">
+								<a href ng-href="{{comment.author_url}}">
+                                    <img ng-src="{{comment.avatar}}"/>
+                                </a>
+							</span>
+							<span ng-hide="hasAuthorURL({{comment.id}})">
+								<img ng-src="{{comment.avatar}}"/>
+							</span>
+                </div>
+                <div class="epoch-comment-author-avatar">
+							<span ng-show="hasAuthorURL({{comment.id}})">
+								<a href ng-href="{{comment.author_url}}">
+                                    {{comment.author_name}}
+                                </a>
+							</span>
+							<span ng-hide="{{comment.author}}">
+								{{comment.author_name}}
+							</span>
+                </div>
+                <span class="epoch-divide">&#183;</span>
+                <a href ng-href="{{comment.link}}">
+                    <time datetime="comment_date">{{comment.date}}</time>
+                </a>
+            </div>
+            <!-- .comment-author -->
+
+            <p class="epoch-comment-awaiting-moderation" ng-hide="isApproved({{comment.id}})">
+                {{translations.awaiting_moderation}}
+            </p>
+        </footer>
+        <!-- .comment-meta -->
+
+        <div class="epoch-comment-content">
+            <div ng-bind-html="comment.content.rendered"></div>
+        </div>
+        <!-- .comment-content -->
+
+
+        <ul class="epoch-moderation-actions" ng-show="{{comments_open}}">
+            <li class="epoch-approve"  ng-hide="isApproved({{comment.id}})">
+                <button ng-click="approve()">
+                    {{translations.approve}}
+                </button>
+            </li>
+
+            <li class="epoch-unapprove" ng-show="isApproved({{comment.id}})">
+                <button ng-click="unApprove()">
+                    {{translations.unApprove}}
+                </button>
+            </li>
+
+            <li class="epoch-trash">
+                <button ng-click="trash()">
+                    {{translations.trash}}
+                </button>
+            </li>
+            <li class="epoch-spam">
+                <button ng-click="spam()">
+                    {{translations.spam}}
+                </button>
+            </li>
+        </ul>
+
+
+        <a class="epoch-reply" ng-show="comments_open">
+            {{translations.reply}}
+        </a>
+
+    </article>
+    <!-- .comment-body -->
+</div>
+<div class="epoch-children" id="children-of-{{comment.id}}" ng-repeat="comment in comment.children track by $index">
+    <div ng-include src="partials + 'comment.html'" class="child child-of-{{comment.id}}" style="margin-left:20px;"></div>
+</div>
