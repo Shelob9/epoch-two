@@ -47,6 +47,7 @@ add_action( 'wp_enqueue_scripts', function(){
 	wp_enqueue_script( 'angular-sanitize', '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.9/angular-sanitize.min.js' );
 	wp_enqueue_script( 'lowdash', '//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.1.0/lodash.min.js');
 	wp_enqueue_script( 'epoch-two', EPOCH_URL . 'assets/js/front-end/epoch.js', array( 'angularjs' ) );
+	wp_enqueue_style( 'epoch-light', EPOCH_URL . 'assets/css/front-end/light.css' );
 	$vars = array(
 		'api'          => array(
 			'root'     => esc_url_raw( rest_url() ),
