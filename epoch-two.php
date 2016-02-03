@@ -58,7 +58,6 @@ add_action( 'wp_enqueue_scripts', function(){
 		'translations' => epoch_translation(),
 		'partials'     => esc_url_raw( EPOCH_URL . 'assets/partials/' ),
 		'user'         => 0,
-
 	);
 	$logout_link = wp_logout_url();
 	$current_url = get_permalink( get_post() );

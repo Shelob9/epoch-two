@@ -24,7 +24,7 @@
                 </div>
                 <span class="epoch-divide">&#183;</span>
                 <a href ng-href="{{comment.link}}">
-                    <time datetime="comment_date">{{comment.date}}</time>
+                    <time datetime="comment_date">{{comment.date| date:'medium'}}</time>
                 </a>
             </div>
             <!-- .comment-author -->

@@ -2,7 +2,7 @@ var Epoch = Epoch || {};
 
 Epoch.app = angular.module( 'epoch', ['ngResource', 'ngSanitize' ] );
 
-Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', function( $scope, $http, $sce, $timeout ){
+Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filter', function( $scope, $http, $sce, $timeout, $filter ){
     var page = 1;
     var postID = jQuery( '#epoch' ).attr( 'data-post-id' );
     var totalPages;
