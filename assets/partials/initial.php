@@ -11,21 +11,6 @@
 
 global $post;
 
-function epoch_get_form( $post_id ) {
-	if ( 0 < absint( $post_id ) && comments_open( $post_id ) ) {
-
-		ob_start();
-		comment_form( [], $post_id );
-		$html = ob_get_clean();
-	} else if ( ! comments_open( $post_id ) ) {
-		$html = __( 'Comments are closed.', 'epoch' );
-	} else {
-		$html = '';
-	}
-
-	return $html;
-
-}
 
 $comment_count = get_comment_count( $post->ID );
 $comment_count = $comment_count[ 'approved' ];
@@ -48,8 +33,9 @@ echo $comment_count_message;
 
 	?>
 
-<div id="epoch" data-post-id="<?php echo esc_attr( $post->ID ); ?>">
-	<div id="epoch-comment-template" ng-controller="comments">
+<div id="epoch" data-post-id="<?php echo esc_attr( $post->ID ); ?>" ng-app="epoch"  ng-controller="comments">
+
+	<div id="epoch-comment-template">
 		<div ng-repeat="comment in post_comments track by $index" ng-include="partials + 'comment.html'" class="epoch-comment">
 		</div>
 		<!--/ng-repeater-->
@@ -61,7 +47,18 @@ echo $comment_count_message;
 		</button>
 
 	</div>
-	<div ng-controller="commentForm">
-		<?php echo epoch_get_form( $post->ID ); ?>
-	</div>
+	<div id="epoch-comment-before"></div>
+	<?php
+		if( comments_open( $post ) ) : ?>
+		<div ng-controller="commentForm" id="epoch-reply">
+			<?php
+				if( 0 != get_current_user_id() ) {
+					include( EPOCH_PATH . 'assets/partials/logged-in-form.html' );
+				}else{
+					include( EPOCH_PATH . 'assets/partials/not-logged-in-form.html' );
+				}
+			endif;
+		?>
+
+		</div>
 </div>

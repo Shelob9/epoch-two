@@ -10,9 +10,19 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
     var commentIDs = [];
     $scope.post_comments = {};
     $scope.partials = EPOCH_VARS.partials;
+    if ( _.isEmpty( $scope.comment ) ) {
+        $scope.comment = {
+            author: EPOCH_VARS.user,
+            content: '',
+            parent: 0,
+            post: $scope.postID
+        };
+    }
 
     /**
      * Calculate highest comment ID
+     *
+     * @since 2.0.0
      *
      * @returns {number}
      */
@@ -28,7 +38,9 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
     };
 
     /**
+     * Check if comments are open
      *
+     * @since 2.0.0
      */
     $http({
         url: EPOCH_VARS.api.posts + postID,
@@ -43,10 +55,10 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
 
     $scope.translations = EPOCH_VARS.translations;
 
-
-
     /**
      * Get comments and update model
+     *
+     * @since 2.0.0
      */
     var getComments = function(){
         var highest = findHighest();
@@ -88,6 +100,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
     /**
      * Should we hide previous button?
      *
+     * @since 2.0.0
+     *
      * @returns {boolean}
      */
     $scope.showPrevPage = function() {
@@ -99,6 +113,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
     /**
      * Should we hide next button?
      *
+     * @since 2.0.0
+     *
      * @returns {boolean}
      */
     $scope.showNextPage = function() {
@@ -109,7 +125,10 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
     };
 
     /**
-     * Callback for getting previous page
+     * Callback for getting previous page of comments
+     *
+     * @since 2.0.0
+     *
      */
     $scope.prev = function(){
         page--;
@@ -118,7 +137,9 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
     };
 
     /**
-     * Callback for getting next page
+     * Callback for getting next page of comments
+     *
+     * @since 2.0.0
      */
     $scope.next = function(){
         page++;
@@ -127,6 +148,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
 
     /**
      * Have URL for comment author?
+     *
+     * @since 2.0.0
      *
      * @param id
      * @returns {boolean}
@@ -141,6 +164,14 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
 
     };
 
+    /**
+     * Check if comment is approved
+     *
+     * @since 2.0.0
+     *
+     * @param id
+     * @returns {boolean}
+     */
     $scope.isApproved = function( id ){
         var match = find( id );
         if ( !_.isEmpty( match ) ) {
@@ -174,7 +205,6 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
             total = res.headers( 'w-wp-total' );
-            console.log( res );
         }, function errorCallback( res ) {
             var error = res.data.message;
         });
@@ -209,20 +239,80 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', functi
 
     };
 
+    /**
+     * Move form for inline comments
+     *
+     * @since 2.0.0
+     */
+    $scope.moveForm = function() {
+        var id = this.comment.id;
+        angular.element( '#epoch-reply' ).detach().appendTo( '#comment-' + id );
+        $scope.comment.parent = id;
+    };
 
+    /**
+     * Edit comment
+     *
+     * @since 2.0.0
+     *
+     * @todo this
+     */
+    $scope.editComment = function(){
+        $scope.comment = this.comment;
+    };
+
+    /**
+     * Put comment form back when canceling
+     *
+     * @since 2.0.0
+     */
+    $scope.cancel = function() {
+        $scope.comment = {};
+        angular.element( '#epoch-reply' ).detach().appendTo( '#epoch-comment-before' );
+    };
+
+/**
     $timeout( poll, 3000);
 
     var poll = function(){
         getComments();
     }
 
-
+**/
 }]);
 
+/**
+ * Controller for comment form
+ *
+ * @since 2.0.0
+ */
+Epoch.app.controller( 'commentForm', [ '$scope', '$http', function( $scope, $http ){
+    $scope.translations = EPOCH_VARS.translations;
+    $scope.logout_link = EPOCH_VARS.logout_link,
+    $scope.postID = jQuery( '#epoch' ).attr( 'data-post-id' );
 
-Epoch.app.controller( 'commentForm', [ '$scope', '$http'], function( $scope, $http ){
 
-});
+    /**
+     * Handle comment submission
+     *
+     * @since 2.0.0
+     */
+    $scope.submit = function(){
+        $http({
+            url: EPOCH_VARS.api.comments + '?_wpnonce=' + EPOCH_VARS.nonce,
+            params: $scope.comment,
+            method: 'POST'
+        }).then( function( res ) {
+            $scope.comment = {};
+            totalPages =  res.headers('x-wp-totalpages');
+            total = res.headers( 'w-wp-total' );
+            console.log( res );
+        }, function errorCallback( res ) {
+            var error = res.data.message;
+        });
+    }
+
+}]);
 
 
 

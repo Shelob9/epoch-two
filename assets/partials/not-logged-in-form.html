@@ -1,0 +1,46 @@
+<div id="respond" class="comment-respond">
+    <h3 id="reply-title" class="comment-reply-title">
+        {{translations.form.header}}
+    </h3>
+    <p class="comment-notes">
+        <span id="email-notes">{{translations.form.email_not_pub}}</span> {{translations.form.req_fields_are}} <span class="required">*</span>
+    </p>
+
+    <form id="commentform" class="comment-form" ng-submit="submit()">
+        <p class="comment-form-comment">
+            <label for="comment">
+                {{translations.form.comment_label}}
+            </label>
+            <textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525" aria-required="true" required="required" ng-model="comment.content">
+
+            </textarea>
+        </p>
+
+        <p class="comment-form-author">
+            <label for="author">
+                {{translations.form.name}} <span class="required">*</span>
+            </label>
+            <input id="author" name="author" type="text" ng-model="comment.author_name" size="30" maxlength="245" aria-required="true" required="required">
+        </p>
+
+        <p class="comment-form-email">
+            <label for="email">
+                {{translations.form.email}} <span class="required">*</span>
+            </label>
+            <input id="email" name="email"  type="email" ng-model="comment.author_email" size="30" maxlength="100" aria-describedby="email-notes" aria-required="true" required="required">
+        </p>
+
+        <p class="comment-form-url">
+            <label for="url">
+                {{translations.form.website}}
+            </label>
+            <input id="url" name="url" type="url" ng-model="comment.author_url" size="30" maxlength="200">
+        </p>
+
+        <p class="form-submit">
+            <input name="submit" type="submit" id="submit" class="submit" value="{{translations.form.submit_value}}">
+            <input type="hidden" name="comment_parent" id="{{comment.parent}}" value="0">
+        </p>
+    </form>
+
+</div><!-- #respond -->

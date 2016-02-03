@@ -1,0 +1,28 @@
+<div id="respond" class="comment-respond">
+    <h3 id="reply-title" class="comment-reply-title">
+        {{translations.form.header}}
+    </h3>
+    <a rel="nofollow" id="cancel-comment-reply-link" ng-click="cancel()">
+        {{translations.form.cancel}}
+    </a>
+    <form id="commentform" class="comment-form" ng-submit="submit()">
+        <p class="logged-in-as">
+            <a href="http://trunk.wordpress.pv/wordpress/wp-admin/profile.php" aria-label="{{translations.form.logged_in_aria_label}}"></a>. {{translations.form.logged_in_message}} <a href="{{logout_link}}">Log  out?</a>
+        </p>
+
+        <p class="comment-form-comment">
+            <label for="comment">
+                {{translations.form.comment_label}}
+            </label>
+            <textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525" aria-required="true" required="required" ng-model="comment.content">
+
+            </textarea>
+        </p>
+
+        <p class="form-submit">
+            <input name="submit" type="submit" id="submit" class="submit" value="{{translations.form.submit_value}}">
+            <input type="hidden" name="comment_parent" id="{{comment.parent}}" value="0">
+        </p>
+        <p></p>
+    </form>
+</div>
