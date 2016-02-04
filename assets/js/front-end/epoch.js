@@ -181,22 +181,42 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         }
     };
 
-    $scope.approve = function( ){
+    /**
+     * Approve a comment
+     *
+     * @since 2.0.0
+     */
+    $scope.approve = function(){
         var comment = this.comment;
         return update_status( comment, 'approved' );
     };
 
-    $scope.unApprove = function( ){
+    /**
+     * Unpprove a comment
+     *
+     * @since 2.0.0
+     */
+    $scope.unApprove = function(){
         var comment = this.comment;
         return update_status( comment, 'hold' );
     };
 
-    $scope.spam = function( id ){
+    /**
+     * Spam a comment
+     *
+     * @since 2.0.0
+     */
+    $scope.spam = function(){
         var comment = this.comment;
         return update_status( comment, 'spam' );
     };
 
-    $scope.delete = function( id ){
+    /**
+     * Delete a comment
+     *
+     * @since 2.0.0
+     */
+    $scope.delete = function(){
         var comment = this.comment;
         var id = comment.id;
         $http({
@@ -210,7 +230,12 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         });
     };
 
-
+    /**
+     * Find a comment in the current comments object by comment ID
+     *
+     * @since 2.0.0
+     * @param id
+     */
     var find = function( id ){
         var found = _.filter( $scope.post_comments, _.matches( {
             id: id
@@ -240,12 +265,21 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
     };
 
     /**
-     * Move form for inline comments
+     * Click handler for moving form form for inline comments
      *
      * @since 2.0.0
      */
     $scope.moveForm = function() {
         var id = this.comment.id;
+        moveForm( id );
+    };
+
+    /**
+     * Move handler for moving form form for inline comments
+     *
+     * @since 2.0.0
+     */
+    var moveForm = function ( id ) {
         angular.element( '#epoch-reply' ).detach().appendTo( '#comment-' + id );
         $scope.comment.parent = id;
     };
@@ -259,6 +293,22 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
      */
     $scope.editComment = function(){
         $scope.comment = this.comment;
+        $scope.comment.content = this.comment.content.rendered;
+        moveForm( this.comment.id );
+
+    };
+
+    /**
+     * Show edit link?
+     *
+     * @since 2.2.0
+     *
+     * @returns {boolean}
+     */
+    $scope.showEdit = function(){
+        if( this.comment.author == EPOCH_VARS.user ){
+            return true;
+        }
     };
 
     /**
@@ -270,6 +320,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         $scope.comment = {};
         angular.element( '#epoch-reply' ).detach().appendTo( '#epoch-comment-before' );
     };
+
+
 
 /**
     $timeout( poll, 3000);

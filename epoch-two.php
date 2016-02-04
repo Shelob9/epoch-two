@@ -86,6 +86,7 @@ function epoch_translation() {
 		'trash' => esc_html__( 'Delete Comment', 'epoch' ),
 		'spam' => esc_html__( 'Spam Comment', 'epoch' ),
 		'reply' => esc_html__( 'Reply', 'epoch' ),
+		'edit' => esc_html__( 'Edit', 'epoch' ),
 		'form' => array(
 			'header' => esc_html__( 'Leave a Reply', 'epoch' ),
 			'logged_in_aria_label' => esc_html__( 'Logged in as admin. Edit your profile.', 'epoch' ),
