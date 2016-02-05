@@ -45,7 +45,8 @@ add_action( 'wp_enqueue_scripts', function(){
 	wp_enqueue_script( 'angularjs', '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.9/angular.min.js');
 	wp_enqueue_script( 'angular-resource', '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.9/angular-resource.min.js' );
 	wp_enqueue_script( 'angular-sanitize', '//cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.9/angular-sanitize.min.js' );
-	wp_enqueue_script( 'lowdash', '//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.1.0/lodash.min.js');
+	wp_enqueue_script( 'lowdash', '//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.1.0/lodash.min.js' );
+	wp_enqueue_script( 'visibility', '//cdnjs.cloudflare.com/ajax/libs/visibility.js/1.2.1/visibility.min.js', array('jquery') );
 	wp_enqueue_script( 'epoch-two', EPOCH_URL . 'assets/js/front-end/epoch.js', array( 'angularjs' ) );
 	wp_enqueue_style( 'epoch-light', EPOCH_URL . 'assets/css/front-end/light.css' );
 	$vars = array(
@@ -65,6 +66,19 @@ add_action( 'wp_enqueue_scripts', function(){
 		$logout_link = add_query_arg( 'redirect_to', $current_url, $logout_link );
 
 	}
+
+	$vars[ 'epoch_options' ] = array(
+		'interval' => 15000
+	);
+
+	/**
+	 * Turn live update mode on and off.
+	 *
+	 * If this filter is set to false, comments from other users will not live update.
+	 *
+	 * @since 1.0.1
+	 */
+	$vars[ 'live_mode' ] = (bool) apply_filters( 'epoch_live_mode', true );
 
 	$vars[ 'logout_link' ] = $logout_link;
 	if ( 0 != get_current_user_id() ) {
@@ -117,7 +131,7 @@ add_filter( 'comments_template', function(){
 add_action( 'rest_api_init', function() {
 	if( isset( $_GET[ 'epoch' ], $_GET[ 'post' ], $_GET[ 'epochHighest' ]  ) && 0 != absint( $_GET[ 'epochHighest' ] ) ) {
 		include_once( dirname( __FILE__ ) . '/classes/Epoch_Highest_Filter.php' );
-		new Epoch_Children_Filter( absint( $_GET[ 'post' ] ), absint( $_GET[ 'epochHighest' ] ) );
+		new Epoch_Highest_Filter( absint( $_GET[ 'post' ] ), absint( $_GET[ 'epochHighest' ] ) );
 	}
 
 	if( isset( $_GET[ 'epoch' ] ) ) {

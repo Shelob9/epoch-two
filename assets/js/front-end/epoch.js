@@ -1,3 +1,4 @@
+/** globals angular, jQuery, EPOCH_VARS, Visibility **/
 var Epoch = Epoch || {};
 
 Epoch.app = angular.module( 'epoch', ['ngResource', 'ngSanitize' ] );
@@ -8,6 +9,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
     var totalPages;
     var total;
     var commentIDs = [];
+    var highest = 0;
     $scope.post_comments = {};
     $scope.partials = EPOCH_VARS.partials;
     if ( _.isEmpty( $scope.comment ) ) {
@@ -19,23 +21,6 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         };
     }
 
-    /**
-     * Calculate highest comment ID
-     *
-     * @since 2.0.0
-     *
-     * @returns {number}
-     */
-    var findHighest = function(){
-
-        var _h = Math.max.apply(null, commentIDs );
-        if( 'NaN' == _h || '-Infinity' == _h || null == _h ) {
-            return 0;
-        }else{
-            return _h;
-        }
-
-    };
 
     /**
      * Check if comments are open
@@ -55,15 +40,15 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
 
     $scope.translations = EPOCH_VARS.translations;
 
+
+
     /**
      * Get comments and update model
      *
      * @since 2.0.0
      */
     var getComments = function(){
-        var highest = findHighest();
         $http({
-
             url: EPOCH_VARS.api.comments,
             params: {
                 page: page,
@@ -71,29 +56,43 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
                 epoch: true,
                 epochHighest: highest
             },
-            cache: true
+            cache: false
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
             total = res.headers( 'w-wp-total' );
+
             if ( 0 < res.data.length ) {
                 $scope.post_comments = res.data;
+
                 for ( var i = 0; i < $scope.post_comments.length; i++ ) {
                     $scope.post_comments[ i ].avatar = $scope.post_comments[ i ].author_avatar_urls[ 96 ];
                     if ( !jQuery.inArray( $scope.post_comments[ i ].id, commentIDs ) ) {
                         commentIDs.push( $scope.post_comments[ i ].id );
                     }
-                    if( !_.isEmpty( $scope.post_comments[ i ].children ) ){
-                        _.forEach( $scope.post_comments[ i ].children, function(child, index) {
+                    if ( !_.isEmpty( $scope.post_comments[ i ].children ) ) {
+                        _.forEach( $scope.post_comments[ i ].children, function ( child, index ) {
                             $scope.post_comments[ i ].children[ index ].avatar = $scope.post_comments[ i ].children[ index ].author_avatar_urls[ 96 ];
-                        });
+                        } );
+                    }
+                    if ( $scope.post_comments[ i ].id > highest ) {
+                        highest = $scope.post_comments[ i ].id;
                     }
                 }
             }
+
         });
     };
 
     //run at start
     getComments();
+
+
+    if ( EPOCH_VARS.live_mode ) {
+        Visibility.every( EPOCH_VARS.epoch_options.interval, function () {
+            getComments();
+        });
+    }
+
 
 
 
