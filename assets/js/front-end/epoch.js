@@ -131,6 +131,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
      *
      */
     $scope.prev = function(){
+        $scope.cancel();
         page--;
         getComments();
 
@@ -142,6 +143,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
      * @since 2.0.0
      */
     $scope.next = function(){
+        $scope.cancel();
         page++;
         getComments();
     };
