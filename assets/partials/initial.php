@@ -14,8 +14,9 @@ global $post;
 
 $comment_count = get_comment_count( $post->ID );
 $comment_count = $comment_count[ 'approved' ];
+$comments_open = comments_open( $post );
 
-if ( $comment_count == 0 and ! comments_open( $post ) ) {
+if ( $comment_count == 0 && ! $comments_open  ) {
 	return;
 }
 echo '<div id="comments" ng-app="epoch">';
@@ -33,7 +34,7 @@ echo $comment_count_message;
 
 	?>
 
-<div id="epoch" data-post-id="<?php echo esc_attr( $post->ID ); ?>" ng-app="epoch"  ng-controller="comments">
+<div id="epoch" data-epoch-post-id="<?php echo esc_attr( $post->ID ); ?>" data-epoch-total="<?php echo esc_attr( $comment_count ); ?>" data-epoch-open="<?php esc_attr( $comments_open ); ?>" ng-app="epoch"  ng-controller="comments">
 
 	<div id="epoch-comment-template">
 		<div ng-repeat="comment in post_comments track by $index" ng-include="partials + 'comment.html'" class="epoch-comment">
