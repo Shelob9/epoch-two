@@ -147,4 +147,57 @@ function epoch_only_parents( $clauses ){
 
 
 
+/**
+ * API Endpoint for comment count
+ *
+ * @since 2.0.0
+ */
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'epoch/v2', '/comment-count/(?P<id>\d+)', array(
+		'methods' => 'GET',
+		'callback' => function( $request ){
+			//@todo replace with old way of getting comment count
+			$counts = get_comment_count( $request->get_param( 'id' ) );
+			if( is_object( $counts ) ){
+				return rest_ensure_response( array( 'count' => $counts->approved ) );
+			}
 
+			return new \WP_Error();
+		},
+		'args' => array(
+			'id' => array(
+				'validate_callback' => 'absint',
+				'required' => true
+			),
+		),
+	) );
+} );
+
+add_filter( 'rest_post_dispatch', 'epoch_post_dispatch');
+/**
+ * @param WP_HTTP_Response $result  Result to send to the client. Usually a WP_REST_Response.
+ * @param WP_REST_Server   $this    Server instance.
+ * @param WP_REST_Request  $request Request used to generate the response.
+ *
+ * @return WP_HTTP_Response
+ */
+function epoch_post_dispatch( $result, $server, $request ){
+	if( isset( $_GET[ 'epoch' ], $_GET[ 'post' ] ) && 0 < absint(( $_GET[ 'post' ] )) ){
+		$query = new WP_Comment_Query(
+			array(
+				'post_ID' => $_GET[ 'post' ],
+				'number' => 1,
+				'order' => 'DESC',
+			)
+		);
+
+		$highest = 0;
+		if( 0 != $query->found_comments ){
+			$highest = wp_list_pluck( $query->comments, 'comment_ID' );
+		}
+		$result->header( 'X-EPOCH-HIGHEST', $highest );
+	}
+
+	return $result;
+
+}
