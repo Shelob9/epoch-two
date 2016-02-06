@@ -8,6 +8,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
     var totalPages;
     var total;
     var commentIDs = [];
+    var highest = 0;
     $scope.post_comments = {};
     $scope.partials = EPOCH_VARS.partials;
     if ( _.isEmpty( $scope.comment ) ) {
@@ -19,23 +20,6 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         };
     }
 
-    /**
-     * Calculate highest comment ID
-     *
-     * @since 2.0.0
-     *
-     * @returns {number}
-     */
-    var findHighest = function(){
-
-        var _h = Math.max.apply(null, commentIDs );
-        if( 'NaN' == _h || '-Infinity' == _h || null == _h ) {
-            return 0;
-        }else{
-            return _h;
-        }
-
-    };
 
     /**
      * Check if comments are open
@@ -61,7 +45,6 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
      * @since 2.0.0
      */
     var getComments = function(){
-        var highest = findHighest();
         $http({
 
             url: EPOCH_VARS.api.comments,
@@ -74,21 +57,28 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             cache: true
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'w-wp-total' );
+            total = res.headers( 'x-wp-total' );
+            highest = res.headers( 'x-wp-highest' );
             if ( 0 < res.data.length ) {
-                $scope.post_comments = res.data;
-                for ( var i = 0; i < $scope.post_comments.length; i++ ) {
-                    $scope.post_comments[ i ].avatar = $scope.post_comments[ i ].author_avatar_urls[ 96 ];
-                    if ( !jQuery.inArray( $scope.post_comments[ i ].id, commentIDs ) ) {
-                        commentIDs.push( $scope.post_comments[ i ].id );
-                    }
-                    if( !_.isEmpty( $scope.post_comments[ i ].children ) ){
-                        _.forEach( $scope.post_comments[ i ].children, function(child, index) {
-                            $scope.post_comments[ i ].children[ index ].avatar = $scope.post_comments[ i ].children[ index ].author_avatar_urls[ 96 ];
+                var id;
+                _.forEach( res.data, function ( comment, i ) {
+                    id = comment.id;
+                    comment.avatar = comment.author_avatar_urls[ 96 ];
+                    if( !_.isEmpty( comment.children  ) ) {
+                        _.forEach( comment.children, function( child, cI ){
+                            comment.children[ child.id ].avatar = child.author_avatar_urls[ 96 ];
                         });
                     }
-                }
+                    $scope.post_comments[ id ] = comment;
+                    commentIDs.push( {
+                        id: id,
+                        page: page
+                    } );
+                } );
+
             }
+
+
         });
     };
 
@@ -131,8 +121,11 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
      *
      */
     $scope.prev = function(){
+        pageVisible( page, true );
+        $scope.cancel();
         page--;
         getComments();
+        pageVisible( page, false );
 
     };
 
@@ -142,8 +135,36 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
      * @since 2.0.0
      */
     $scope.next = function(){
+        pageVisible( page, true );
+        $scope.cancel();
         page++;
         getComments();
+        pageVisible( page, false );
+
+    };
+
+    /**
+     * Handle hiding and showing of comments in scope.post_comments on pageination
+     *
+     * @since 2.0.0
+     *
+     * @param page Page nu,nber
+     * @param hide Hide (true) or show (false)
+     */
+    var pageVisible = function( page, hide ) {
+        found = _.filter( commentIDs, {page:page} );
+        if ( !_.isEmpty( found ) ) {
+            _.forEach( found, function ( comment, i ) {
+                if ( hide ) {
+                    angular.element( '#comment-' + comment.id ).hide().attr( 'aria-hidden', true );
+                } else {
+                    angular.element( '#comment-' + comment.id ).show().attr( 'aria-hidden', false );
+                }
+
+            } );
+        }
+
+        return found;
     };
 
     /**
@@ -224,7 +245,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             method: 'DELETE'
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'w-wp-total' );
+            total = res.headers( 'x-wp-total' );
+            highest = res.headers( 'x-wp-highest' );
         }, function errorCallback( res ) {
             var error = res.data.message;
         });
@@ -245,6 +267,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         }
     };
 
+
     var update_status = function( comment, status ){
         var id = comment.id;
         $http({
@@ -256,8 +279,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             method: 'POST'
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'w-wp-total' );
-            console.log( res );
+            total = res.headers( 'x-wp-total' );
+            highest = res.headers( 'x-wp-highest' );
         }, function errorCallback( res ) {
             var error = res.data.message;
         });
@@ -323,14 +346,6 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
 
 
 
-/**
-    $timeout( poll, 3000);
-
-    var poll = function(){
-        getComments();
-    }
-
-**/
 }]);
 
 /**
@@ -340,7 +355,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
  */
 Epoch.app.controller( 'commentForm', [ '$scope', '$http', function( $scope, $http ){
     $scope.translations = EPOCH_VARS.translations;
-    $scope.logout_link = EPOCH_VARS.logout_link,
+    $scope.logout_link = EPOCH_VARS.logout_link;
     $scope.postID = jQuery( '#epoch' ).attr( 'data-post-id' );
 
 
