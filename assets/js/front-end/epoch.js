@@ -58,22 +58,31 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
             total = res.headers( 'x-wp-total' );
-            highest = res.headers( 'x-wp-highest' );
+            highest = res.headers( 'x-epoch-highest' );
             if ( 0 < res.data.length ) {
                 var id;
                 _.forEach( res.data, function ( comment, i ) {
                     id = comment.id;
                     comment.avatar = comment.author_avatar_urls[ 96 ];
+
                     if( !_.isEmpty( comment.children  ) ) {
                         _.forEach( comment.children, function( child, cI ){
                             comment.children[ child.id ].avatar = child.author_avatar_urls[ 96 ];
                         });
                     }
-                    $scope.post_comments[ id ] = comment;
+
                     commentIDs.push( {
                         id: id,
-                        page: page
+                        page: page,
+                        parent: comment.parent
                     } );
+
+                    if( 0 != comment.parent && _.has( $scope.post_comments, comment.parent ) ){
+                        $scope.post_comments[ comment.parent ].children = comment;
+
+                    }else{
+                        $scope.post_comments[ id ] = comment;
+                    }
                 } );
 
             }
@@ -82,8 +91,45 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         });
     };
 
-    //run at start
+    /**
+     * Run at start
+     */
     getComments();
+
+    /**
+     * Poll for changes in comment count
+     */
+    if ( EPOCH_VARS.live_mode ) {
+        Visibility.every( EPOCH_VARS.epoch_options.interval, function () {
+            var url;
+            if ( EPOCH_VARS.alt_comment_count ) {
+                url = EPOCH_VARS.api.alt_count;
+            }else{
+                url = EPOCH_VARS.api.count + postID;
+            }
+
+            var check = function( url ) {
+                $http({
+                    url:url
+                } ).then(function successCallback( res ) {
+                    if( res.data.count > total ) {
+                        getComments();
+                    }
+
+                }, function errorCallback( res ) {
+                    if ( EPOCH_VARS.alt_comment_count ) {
+                        //JOSH -> this is a race condition waiting to happen
+                        check( EPOCH_VARS.api.count + postID );
+                    }
+                })
+            };
+
+
+            check( url );
+
+
+        });
+    }
 
 
 

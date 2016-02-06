@@ -61,6 +61,7 @@ class Epoch_Highest_Filter  {
 	 */
 	public function filter( $args ){
 		$args[ 'comment__in' ] = $this->higher_ids;
+		$args[ 'number' ] = 9999999;
 		return $args;
 	}
 

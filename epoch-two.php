@@ -29,8 +29,8 @@ add_action( 'plugins_loaded', function() {
 		return;
 	}
 
-	define('EPOCH_PATH',  plugin_dir_path( __FILE__ ) );
-	define('EPOCH_URL',  plugin_dir_url( __FILE__ ) );
+	define( 'EPOCH_PATH',  plugin_dir_path( __FILE__ ) );
+	define( 'EPOCH_URL',  plugin_dir_url( __FILE__ ) );
 	define( 'EPOCH_VER', '2.0.0-a-1' );
 
 	if ( ! defined( 'EPOCH_ALT_COUNT_CHECK_MODE' ) ) {
@@ -38,13 +38,15 @@ add_action( 'plugins_loaded', function() {
 		/**
 		 * Whether to save comment counts to text files and attempt to use them to check comment counts.
 		 *
-		 * NOTE: Experimental. Do not use.
-		 *
 		 * @since 1.0.1
 		 */
 		define( 'EPOCH_ALT_COUNT_CHECK_MODE', false );
 
 	}
+
+	include_once( EPOCH_PATH . 'classes/Epoch_Helper.php' );
+	include_once( EPOCH_PATH . 'classes/Epoch_Prewrite_Count.php' );
+	new Epoch_Prewrite_Count();
 
 	/**
 	 * Setup scripts/styles
@@ -59,12 +61,15 @@ add_action( 'plugins_loaded', function() {
 		wp_enqueue_script( 'ng-storage', '//rawgithub.com/gsklee/ngStorage/master/ngStorage.js', array( 'angularjs' ) );
 		wp_enqueue_script( 'epoch-two', EPOCH_URL . 'assets/js/front-end/epoch.js', array( 'angularjs' ) );
 		wp_enqueue_style( 'epoch-light', EPOCH_URL . 'assets/css/front-end/light.css' );
+
+		$post = get_post();
 		$vars = array(
 			'api' => array(
 				'root'     => esc_url_raw( rest_url() ),
 				'posts'    => esc_url_raw( rest_url( '/wp/v2/posts/' ) ),
 				'comments' => esc_url_raw( rest_url( '/wp/v2/comments/' ) ),
-				'count'    => esc_url_raw( rest_url( 'epoch/v2/comment-count' ) )
+				'count'    => esc_url_raw( rest_url( 'epoch/v2/comment-count/' ) ),
+				'alt_count' => esc_url_raw( trailingslashit( Epoch_Helper::comment_count_alt_check_url( $post->ID ) ) )
 			),
 			'nonce'        => wp_create_nonce( 'wp_rest' ),
 			'translations' => epoch_translation(),
@@ -72,11 +77,14 @@ add_action( 'plugins_loaded', function() {
 			'user'         => 0,
 		);
 		$logout_link = wp_logout_url();
-		$current_url = get_permalink( get_post() );
+
+		$current_url = get_permalink(  $post->ID );
 		if( filter_var( $current_url, FILTER_VALIDATE_URL ) ){
 			$logout_link = add_query_arg( 'redirect_to', $current_url, $logout_link );
 
 		}
+
+		$vars[ 'alt_comment_count' ] = (bool) EPOCH_ALT_COUNT_CHECK_MODE;
 
 		$vars[ 'epoch_options' ] = array(
 			'interval' => 15000
@@ -140,6 +148,7 @@ add_action( 'plugins_loaded', function() {
 	 * Setup our filters on epoch comment requests
 	 */
 	add_action( 'rest_api_init', function() {
+
 		if( isset( $_GET[ 'epoch' ], $_GET[ 'post' ], $_GET[ 'epochHighest' ]  ) && 0 != absint( $_GET[ 'epochHighest' ] ) ) {
 			include_once( dirname( __FILE__ ) . '/classes/Epoch_Highest_Filter.php' );
 			new Epoch_Highest_Filter( absint( $_GET[ 'post' ] ), absint( $_GET[ 'epochHighest' ] ) );
@@ -183,11 +192,11 @@ add_action( 'plugins_loaded', function() {
 			'callback' => function( $request ){
 				//@todo replace with old way of getting comment count
 				$counts = get_comment_count( $request->get_param( 'id' ) );
-				if( is_object( $counts ) ){
-					return rest_ensure_response( array( 'count' => $counts->approved ) );
+				if( is_array( $counts ) ){
+					return rest_ensure_response( array( 'count' => $counts[ 'approved' ] ) );
 				}
 
-				return new \WP_Error();
+				return new \WP_Error( 'epoch-no-ocunt');
 			},
 			'args' => array(
 				'id' => array(
@@ -208,20 +217,24 @@ add_action( 'plugins_loaded', function() {
 	 */
 	function epoch_post_dispatch( $result, $server, $request ){
 		if( isset( $_GET[ 'epoch' ], $_GET[ 'post' ] ) && 0 != absint( $_GET[ 'post' ] ) ){
-			$query = new WP_Comment_Query();
-			$query->query( array(
-				'post_id' => absint( $_GET[ 'post' ] ),
-				'number' => 1,
-				'order' => 'DESC',
-			) );
+			if ( false ==( $highest =  get_transient( md5( 'EPOCH_' . __FUNCTION__ ) ) ) ) {
+				$query = new WP_Comment_Query();
+				$query->query( array(
+					'post_id' => absint( $_GET[ 'post' ] ),
+					'number'  => 1,
+					'order'   => 'DESC',
+				) );
 
-			$highest = 0;
-			if( 0 != count( $query->comments )){
-				$_highest = wp_list_pluck( $query->comments, 'comment_ID' );
-				if ( ! empty(  $_highest ) ) {
-					$highest = intval( $_highest[ 0 ] );
+				$highest = 0;
+				if ( 0 != count( $query->comments ) ) {
+					$_highest = wp_list_pluck( $query->comments, 'comment_ID' );
+					if ( ! empty( $_highest ) ) {
+						$highest = intval( $_highest[ 0 ] );
+						set_transient( get_transient( md5( 'EPOCH_' . __FUNCTION__ ) ), $highest, 599 );
+					}
 				}
 			}
+
 			$result->header( 'X-Epoch-Highest', $highest );
 		}
 
