@@ -173,7 +173,7 @@ add_action( 'rest_api_init', function () {
 	) );
 } );
 
-add_filter( 'rest_post_dispatch', 'epoch_post_dispatch');
+add_filter( 'rest_post_dispatch', 'epoch_post_dispatch', 25, 3 );
 /**
  * @param WP_HTTP_Response $result  Result to send to the client. Usually a WP_REST_Response.
  * @param WP_REST_Server   $this    Server instance.
