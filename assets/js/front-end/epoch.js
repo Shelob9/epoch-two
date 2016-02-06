@@ -8,6 +8,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
     var totalPages;
     var total;
     var commentIDs = [];
+    var highest = 0;
     $scope.post_comments = {};
     $scope.partials = EPOCH_VARS.partials;
     if ( _.isEmpty( $scope.comment ) ) {
@@ -19,23 +20,6 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         };
     }
 
-    /**
-     * Calculate highest comment ID
-     *
-     * @since 2.0.0
-     *
-     * @returns {number}
-     */
-    var findHighest = function(){
-
-        var _h = Math.max.apply(null, commentIDs );
-        if( 'NaN' == _h || '-Infinity' == _h || null == _h ) {
-            return 0;
-        }else{
-            return _h;
-        }
-
-    };
 
     /**
      * Check if comments are open
@@ -74,7 +58,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             cache: true
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'w-wp-total' );
+            total = res.headers( 'x-wp-total' );
+            highest = res.headers( 'x-wp-highest' );
             if ( 0 < res.data.length ) {
                 $scope.post_comments = res.data;
                 for ( var i = 0; i < $scope.post_comments.length; i++ ) {
@@ -226,7 +211,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             method: 'DELETE'
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'w-wp-total' );
+            total = res.headers( 'x-wp-total' );
+            highest = res.headers( 'x-wp-highest' );
         }, function errorCallback( res ) {
             var error = res.data.message;
         });
@@ -258,8 +244,8 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             method: 'POST'
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'w-wp-total' );
-            console.log( res );
+            total = res.headers( 'x-wp-total' );
+            highest = res.headers( 'x-wp-highest' );
         }, function errorCallback( res ) {
             var error = res.data.message;
         });
