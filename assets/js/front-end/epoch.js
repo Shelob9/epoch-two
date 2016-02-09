@@ -130,6 +130,17 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         });
     }
 
+    /**
+     * Update display of comment count
+     *
+     * @since 2.0.0
+     */
+    scope.$watch('total', function(newValue, oldValue) {
+        if( newValue != oldValue ){
+            angular.element( '#comment-count' ).html( $scope.total );
+        }
+    });
+
 
 
     /**
