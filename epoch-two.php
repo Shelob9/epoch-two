@@ -151,10 +151,9 @@ add_action( 'plugins_loaded', function() {
 
 		if( isset( $_GET[ 'epoch' ], $_GET[ 'post' ], $_GET[ 'epochHighest' ]  ) && 0 != absint( $_GET[ 'epochHighest' ] ) ) {
 			include_once( dirname( __FILE__ ) . '/classes/Epoch_Highest_Filter.php' );
+			remove_filter( 'comments_clauses', 'epoch_only_parents' );
 			new Epoch_Highest_Filter( absint( $_GET[ 'post' ] ), absint( $_GET[ 'epochHighest' ] ) );
-		}
-
-		if( isset( $_GET[ 'epoch' ] ) ) {
+		}elseif( isset( $_GET[ 'epoch' ] ) ) {
 			add_filter( 'comments_clauses', 'epoch_only_parents' );
 
 			include_once( dirname( __FILE__ ) . '/classes/Epoch_Children_Filter.php' );

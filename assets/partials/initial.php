@@ -26,7 +26,7 @@ echo '<div id="comments" ng-app="epoch"><h3>';
 		} else {
 			$comment_count_message = sprintf(
 				_n( 'There is one comment', 'There are %s comments', $comment_count, 'epoch' ),
-				'<span id="comment-count">' . $comment_count . '</span>'
+				'<span id="comment-count" ng-model="total">' . $comment_count . '</span>'
 			);
 		}
 echo $comment_count_message;

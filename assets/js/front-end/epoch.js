@@ -34,72 +34,76 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
         }else{
             $scope.comments_open = false;
         }
+
+        if ( $scope.comments_open && EPOCH_VARS.live_mode ) {
+            Visibility.every( EPOCH_VARS.epoch_options.interval, function () {
+                polling();
+            });
+        }
     });
 
     $scope.translations = EPOCH_VARS.translations;
+
+
+    var results = function( res ){
+        totalPages =  res.headers('x-wp-totalpages');
+        $scope.total = res.headers( 'x-wp-total' );
+        highest = res.headers( 'x-epoch-highest' );
+        if ( 0 < res.data.length ) {
+            var id;
+            _.forEach( res.data, function ( comment, i ) {
+                id = comment.id;
+                comment.avatar = comment.author_avatar_urls[ 96 ];
+
+                if( !_.isEmpty( comment.children  ) ) {
+                    _.forEach( comment.children, function( child, cI ){
+                        comment.children[ child.id ].avatar = child.author_avatar_urls[ 96 ];
+                    });
+                }
+
+                commentIDs.push( {
+                    id: id,
+                    page: page,
+                    parent: comment.parent
+                } );
+
+                if( 0 != comment.parent && _.has( $scope.post_comments, comment.parent ) ){
+                    $scope.post_comments[ comment.parent ].children = comment;
+
+                }else{
+                    $scope.post_comments[ id ] = comment;
+                }
+            } );
+
+        }
+    };
 
     /**
      * Get comments and update model
      *
      * @since 2.0.0
      */
-    var getComments = function(){
-        $http({
-
+    var getComments = function() {
+        $http( {
             url: EPOCH_VARS.api.comments,
             params: {
                 page: page,
                 post: postID,
-                epoch: true,
-                epochHighest: highest
+                epoch: true
             },
             cache: true
-        }).then( function( res ) {
-            totalPages =  res.headers('x-wp-totalpages');
-            $scope.total = res.headers( 'x-wp-total' );
-            highest = res.headers( 'x-epoch-highest' );
-            if ( 0 < res.data.length ) {
-                var id;
-                _.forEach( res.data, function ( comment, i ) {
-                    id = comment.id;
-                    comment.avatar = comment.author_avatar_urls[ 96 ];
-
-                    if( !_.isEmpty( comment.children  ) ) {
-                        _.forEach( comment.children, function( child, cI ){
-                            comment.children[ child.id ].avatar = child.author_avatar_urls[ 96 ];
-                        });
-                    }
-
-                    commentIDs.push( {
-                        id: id,
-                        page: page,
-                        parent: comment.parent
-                    } );
-
-                    if( 0 != comment.parent && _.has( $scope.post_comments, comment.parent ) ){
-                        $scope.post_comments[ comment.parent ].children = comment;
-
-                    }else{
-                        $scope.post_comments[ id ] = comment;
-                    }
-                } );
-
-            }
-
-
-        });
+        } ).then( function ( res ) {
+            results( res );
+        } );
     };
 
-    /**
-     * Run at start
-     */
-    getComments();
 
     /**
-     * Poll for changes in comment count
+     * Callback used when polling for changes in comment count
+     *
+     * @since 2.0.0
      */
-    if ( EPOCH_VARS.live_mode ) {
-        Visibility.every( EPOCH_VARS.epoch_options.interval, function () {
+    var polling = function(){
             var url;
             if ( EPOCH_VARS.alt_comment_count ) {
                 url = EPOCH_VARS.api.alt_count;
@@ -110,9 +114,19 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             var check = function( url ) {
                 $http({
                     url:url
-                } ).then(function successCallback( res ) {
+                } ).then( function successCallback( res ) {
                     if( res.data.count > $scope.total ) {
-                        getComments();
+                        $http( {
+                            url: EPOCH_VARS.api.comments,
+                            params: {
+                                post: postID,
+                                epoch: true,
+                                epochHighest: highest
+                            },
+                            cache: true
+                        } ).then( function ( res ) {
+                            results( res );
+                        } );
                     }
 
                 }, function errorCallback( res ) {
@@ -125,22 +139,12 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
 
 
             check( url );
-
-
-        });
-    }
+    };
 
     /**
-     * Update display of comment count
-     *
-     * @since 2.0.0
+     * Run at start
      */
-    scope.$watch('total', function(newValue, oldValue) {
-        if( newValue != oldValue ){
-            angular.element( '#comment-count' ).html( $scope.total );
-        }
-    });
-
+    getComments();
 
 
     /**
