@@ -18,7 +18,7 @@ $comment_count = $comment_count[ 'approved' ];
 if ( $comment_count == 0 and ! comments_open( $post ) ) {
 	return;
 }
-echo '<div id="comments" ng-app="epoch">';
+echo '<div id="comments" ng-app="epoch"><h3>';
 
 
 		if ( $comment_count == 0 ) {
@@ -32,6 +32,8 @@ echo '<div id="comments" ng-app="epoch">';
 echo $comment_count_message;
 
 	?>
+
+</h3>
 
 <div id="epoch" data-post-id="<?php echo esc_attr( $post->ID ); ?>" ng-app="epoch"  ng-controller="comments">
 

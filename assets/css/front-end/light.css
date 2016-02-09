@@ -3,10 +3,10 @@
     text-align: center !important;
 }
 
-#epoch-comments {font-size: 95% !important; line-height: inherit !important; margin-top: 30px !important;}
+#epoch {font-size: 95% !important; line-height: inherit !important; margin-top: 30px !important;}
 #epoch-commenting {margin-bottom: 25px;}
 
-#epoch-wrap {
+#epoch {
 	margin: 0 auto !important;
 }
 
@@ -32,6 +32,8 @@ a.comment-reply-link {
 	display: inline !important;
 } 
 
+.epoch-comment-author-avatar {float: left;}
+
 .epoch-comment-author-avatar img {
 	width: 48px !important; 
 	height: 48px !important; 
@@ -55,12 +57,12 @@ a.comment-reply-link {
 
 
 
-#epoch-comments a.epoch-author-link { 
+#epoch a.epoch-author-link { 
 	font-weight: bold !important;
 	line-height: normal !important;
 }
 
-#epoch-comments a.epoch-comment-link {
+#epoch a.epoch-comment-link {
 	font-size: 90% !important;
 	color: #aaa !important;
 	font-weight: normal !important;
@@ -145,7 +147,7 @@ article.epoch-single-comment.epoch-success {
 	border: 1px solid #c0392b !important;
 }
 
-article.epoch-single-comment.epoch-wrap-comment-awaiting-moderation .epoch-comment-author {
+article.epoch-single-comment.epoch-comment-awaiting-moderation .epoch-comment-author {
 	background: url(../../../assets/image/em.png) center right no-repeat !important;
 	background-size: 15px !important;
 	padding-right: 30px !important;
@@ -161,16 +163,17 @@ article.epoch-single-comment.epoch-wrap-comment-awaiting-moderation .epoch-comme
 }
 
 
-article.epoch-single-comment.epoch-wrap-comment-awaiting-moderation {
+.epoch-comment-awaiting-moderation {
 	opacity: 0.8 !important;
+	float: right;
 }
 
-body.logged-in article.epoch-single-comment.epoch-wrap-comment-awaiting-moderation:hover {
+body.logged-in .epoch-comment-awaiting-moderation:hover {
    opacity: 1 !important;
 }
 
 
-#epoch-comments .comment-notes {
+#epoch .comment-notes {
 	font-size: 90% !important;
 }
 
@@ -187,30 +190,30 @@ body.logged-in article.epoch-single-comment.epoch-wrap-comment-awaiting-moderati
  
 /*inline reply interface*/
 
-#epoch-comments #reply-title {
+#epoch #reply-title {
 	display: none !important;
 }
 
-.epoch-child div.comment-respond, #epoch-comments #respond {
+.epoch-child div.comment-respond, #epoch #respond {
 	margin-left: 55px !important;
 	font-size: 85% !important;
 	line-height: normal !important; 
 	margin-bottom: 35px !important;
 }
 
-#epoch-comments p.comment-form-author {
+#epoch p.comment-form-author {
 	clear: left !important;
 }
 
 
-#epoch-comments div.comment-respond p.comment-form-author,#epoch-comments div.comment-respond p.comment-form-email,#epoch-comments div.comment-respond p.comment-form-url {
+#epoch div.comment-respond p.comment-form-author,#epoch div.comment-respond p.comment-form-email,#epoch div.comment-respond p.comment-form-url {
 	float: left !important;
 	width: 32% !important;
 	margin: 10px 1% 0 0 !important;
 	padding: 0 !important;
 }
 
-#epoch-comments div.comment-respond p.comment-form-url {
+#epoch div.comment-respond p.comment-form-url {
 	margin-right: 0 !important;
 }
 
@@ -230,7 +233,7 @@ body.logged-in article.epoch-single-comment.epoch-wrap-comment-awaiting-moderati
 	width:100% !important;
 }
 
-#epoch-comments div.comment-respond p.comment-form-comment {
+#epoch div.comment-respond p.comment-form-comment {
 	clear: left !important;
 	width: auto !important;
 	margin: 0 0 10px 0 !important;
@@ -238,7 +241,7 @@ body.logged-in article.epoch-single-comment.epoch-wrap-comment-awaiting-moderati
 	width: 98% !important;
 }
 
-#epoch-comments textarea, textarea#comment {
+#epoch textarea, textarea#comment {
 	color: #383838 !important;
 	background: #fff !important;
 	width: 100% !important;
@@ -246,36 +249,36 @@ body.logged-in article.epoch-single-comment.epoch-wrap-comment-awaiting-moderati
 }
 
 
-#epoch-comments p.logged-in-as {
+#epoch p.logged-in-as {
 	float: right !important;
 	font-size: 85% !important;
 }
 
-#epoch-comments #comment {
+#epoch #comment {
 	min-height: 100px !important;
 }
 
-#epoch-comments div.comment-respond p.comment-notes {
+#epoch div.comment-respond p.comment-notes {
 	margin-bottom: 10px !important;
 	text-align: left !important;
 } 
 
-#epoch-comments p.form-submit {
+#epoch p.form-submit {
 	padding: 0 !important;
 	margin: 0 !important;
 }
 
-#epoch-comments p.form-submit input {
+#epoch p.form-submit input {
 	margin: 0 !important;
 }
 
-#epoch-comments input#submit:disabled {
+#epoch input#submit:disabled {
 	color: #ABABAB !important;
 	background: #F5F5F5 !important;
 	cursor: not-allowed !important;
 }
 
-#epoch-comments input#submit:disabled:hover {
+#epoch input#submit:disabled:hover {
 	cursor: not-allowed !important;
 }
 
@@ -335,19 +338,19 @@ ul.epoch-comment-actions {
 }
 
 
-#epoch-comments div.comment-respond p.comment-form-author,#epoch-comments div.comment-respond p.comment-form-email,#commentform p.comment-form-author,#commentform p.comment-form-email {
+#epoch div.comment-respond p.comment-form-author,#epoch div.comment-respond p.comment-form-email,#commentform p.comment-form-author,#commentform p.comment-form-email {
 	float: left !important;
 	width: 49% !important;
 	margin-right: 1% !important; 
 	margin-bottom: 0 !important;
 }
 
-#epoch-comments div.comment-respond p.comment-form-email {
+#epoch div.comment-respond p.comment-form-email {
 	margin-right: 0 !important;
 	width: 50% !important;
 }
 
-#epoch-comments div.comment-respond p.comment-form-url {
+#epoch div.comment-respond p.comment-form-url {
 	padding-top: 5px !important;
 }
 
@@ -357,17 +360,17 @@ ul.epoch-comment-actions {
 	padding: 10px 5px !important;
 }
 
-#epoch-comments div.comment-respond p.comment-form-url, .comment-form-url input {
+#epoch div.comment-respond p.comment-form-url, .comment-form-url input {
 	width:100% !important;
 }
 
 
 
-#epoch-comments div.comment-respond p.comment-form-comment, #epoch-comments div.comment-respond p.comment-form-url, #epoch-comments div.comment-respond p.comment-form-url input,#commentform p.comment-form-url {
+#epoch div.comment-respond p.comment-form-comment, #epoch div.comment-respond p.comment-form-url, #epoch div.comment-respond p.comment-form-url input,#commentform p.comment-form-url {
 	width: 100% !important;
 }
 
-.epoch-child div.comment-respond, #epoch-comments #respond {
+.epoch-child div.comment-respond, #epoch #respond {
 	margin-left: 25px !important;
     border-left: 1px solid #ddd !important;
     padding-left: 10px !important;
@@ -460,7 +463,7 @@ ul.epoch-comment-actions li .safe-comments-report-link a {
 	color: #6B3131 !important;
 }
 
-.bypostauthor .safe-comments-report-link, .epoch-wrap-comment-awaiting-moderation .safe-comments-report-link {
+.bypostauthor .safe-comments-report-link, .epoch-comment-awaiting-moderation .safe-comments-report-link {
 	display: none;
 }
 
