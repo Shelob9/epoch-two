@@ -196,7 +196,7 @@ add_action( 'plugins_loaded', function() {
 					return rest_ensure_response( array( 'count' => $counts[ 'approved' ] ) );
 				}
 
-				return new \WP_Error( 'epoch-no-ocunt');
+				return new \WP_Error( 'epoch-no-count');
 			},
 			'args' => array(
 				'id' => array(
@@ -217,12 +217,13 @@ add_action( 'plugins_loaded', function() {
 	 */
 	function epoch_post_dispatch( $result, $server, $request ){
 		if( isset( $_GET[ 'epoch' ], $_GET[ 'post' ] ) && 0 != absint( $_GET[ 'post' ] ) ){
-			if ( false ==( $highest =  get_transient( md5( 'EPOCH_' . __FUNCTION__ ) ) ) ) {
+			//JOSH - reconsider this caching, would need to be cleared properly to work...
+			if ( 1==1 || false == ( $highest =  get_transient( md5( 'EPOCH_' . __FUNCTION__ ) ) ) ) {
 				$query = new WP_Comment_Query();
 				$query->query( array(
 					'post_id' => absint( $_GET[ 'post' ] ),
 					'number'  => 1,
-					'order'   => 'DESC',
+					'order'   => 'DESC'
 				) );
 
 				$highest = 0;

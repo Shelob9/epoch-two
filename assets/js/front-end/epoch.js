@@ -6,7 +6,6 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
     var page = 1;
     var postID = jQuery( '#epoch' ).attr( 'data-post-id' );
     var totalPages;
-    var total;
     var commentIDs = [];
     var highest = 0;
     $scope.post_comments = {};
@@ -57,7 +56,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             cache: true
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'x-wp-total' );
+            $scope.total = res.headers( 'x-wp-total' );
             highest = res.headers( 'x-epoch-highest' );
             if ( 0 < res.data.length ) {
                 var id;
@@ -112,7 +111,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
                 $http({
                     url:url
                 } ).then(function successCallback( res ) {
-                    if( res.data.count > total ) {
+                    if( res.data.count > $scope.total ) {
                         getComments();
                     }
 
@@ -291,7 +290,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             method: 'DELETE'
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'x-wp-total' );
+            $scope.total = res.headers( 'x-wp-total' );
             highest = res.headers( 'x-wp-highest' );
         }, function errorCallback( res ) {
             var error = res.data.message;
@@ -325,7 +324,7 @@ Epoch.app.controller( 'comments', ['$scope', '$http', '$sce', '$timeout', '$filt
             method: 'POST'
         }).then( function( res ) {
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'x-wp-total' );
+            $scope.total = res.headers( 'x-wp-total' );
             highest = res.headers( 'x-wp-highest' );
         }, function errorCallback( res ) {
             var error = res.data.message;
@@ -418,7 +417,7 @@ Epoch.app.controller( 'commentForm', [ '$scope', '$http', function( $scope, $htt
         }).then( function( res ) {
             $scope.comment = {};
             totalPages =  res.headers('x-wp-totalpages');
-            total = res.headers( 'w-wp-total' );
+            $scoe.total = res.headers( 'w-wp-total' );
             console.log( res );
         }, function errorCallback( res ) {
             var error = res.data.message;
